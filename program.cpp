@@ -1,6 +1,18 @@
-//TODO: add file header
-//TODO: add function headers
-
+/***************************************************************************
+* File: program.cpp
+* Author: Rigre R. Garciandia
+* Procedures:
+* main - Uses a fork and a pipe to make a client and a server process. The client sends in 
+*    data for a square, and the server checks whether it's a square and returns the data
+* printMachineInfo - gets and prints system information of the machine running the program
+* printSquare - takes in a 3x3 2d array reprenting a matrix of numbers, and prints it out in square format
+* isMagicSquare - returns true if the square represented by the string is a magic square, false otherwise
+* clientMain - main method for the client process. It makes the call to the server with a 
+*   static magic square string. It then waits for the result and prints it out.
+* serverMain - main method for the server process. It waits for a string to be put through the
+*   pipe, then processes it to check whether it's a magic square and retuns the result through
+*   the pipe
+***************************************************************************/
 
 #include <iostream>
 #include <unistd.h>
@@ -8,6 +20,12 @@
 #include <sys/wait.h>
 #include <string.h>
 
+/***************************************************************************
+* void printMachineInfo()
+* Author: Rigre R. Garciandia
+* Date: 17 September 2021
+* Description: gets and prints system information of the machine running the program
+**************************************************************************/
 void printMachineInfo()
 {
     //gather data
@@ -32,9 +50,18 @@ void printMachineInfo()
     std::cout << "--------------------------------------------------------------------" << std::endl;
 }
 
+/***************************************************************************
+* void printSquare(int nums[][3])
+* Author: Rigre R. Garciandia
+* Date: 17 September 2021
+* Description: takes in a 3x3 2d array reprenting a matrix of numbers, and prints it out in square format
+*
+* Parameters:
+* nums I/P int[][3] The 2d matrix to be printed out
+**************************************************************************/
 void printSquare(int nums[][3])
 {
-    for (int r = 0; r < 3; r++) 
+    for (int r = 0; r < 3; r++)
     {
         for (int c = 0; c < 3; c++)
         {
@@ -44,10 +71,20 @@ void printSquare(int nums[][3])
     }
 }
 
+/***************************************************************************
+* bool isMagicSquare(char *str)
+* Author: Rigre R. Garciandia
+* Date: 17 September 2021
+* Description: returns true if the square represented by the string is a magic square, false otherwise
+*
+* Parameters:
+* str I/P char* The string to be analyzed
+**************************************************************************/
 bool isMagicSquare(char *str)
 {
     int nums[3][3];
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 9; i++)
+    {
         nums[i / 3][i % 3] = str[i] - '0'; //get the int value of an ascii character
     }
     printSquare(nums);
@@ -60,7 +97,7 @@ bool isMagicSquare(char *str)
     int firstRowSum = nums[0][0] + nums[0][1] + nums[0][2];
 
     //checking the remaining rows
-    for (int r = 1; r < 3; r++) 
+    for (int r = 1; r < 3; r++)
     {
         int rowSum = nums[r][0] + nums[r][1] + nums[r][2];
         if (rowSum != firstRowSum)
@@ -87,12 +124,23 @@ bool isMagicSquare(char *str)
     return true;
 }
 
+/***************************************************************************
+* void clientMain(int readingPipe, int writingPipe)
+* Author: Rigre R. Garciandia
+* Date: 17 September 2021
+* Description: main method for the client process. It makes the call to the server with a 
+*   static magic square string. It then waits for the result and prints it out.
+*
+* Parameters:
+* readingPipe I/P int File descriptor of reading pipe for the client
+* writingPipe I/P int File descriptor of writing pipe for the client
+**************************************************************************/
 void clientMain(int readingPipe, int writingPipe)
 {
     char str[10] = "276951438";
     std::cout << "Sent string: " << str << std::endl;
-    write(writingPipe, str, 9 * sizeof(char)); 
-    
+    write(writingPipe, str, 9 * sizeof(char));
+
     bool result;
     read(readingPipe, &result, sizeof(bool));
     std::cout << "Received result: " << result << std::endl;
@@ -101,6 +149,18 @@ void clientMain(int readingPipe, int writingPipe)
     close(writingPipe);
 }
 
+/***************************************************************************
+* void serverMain(int readingPipe, int writingPipe)
+* Author: Rigre R. Garciandia
+* Date: 17 September 2021
+* Description: main method for the server process. It waits for a string to be put through the
+*   pipe, then processes it to check whether it's a magic square and retuns the result through
+*   the pipe
+*
+* Parameters:
+* readingPipe I/P int File descriptor of reading pipe for the server
+* writingPipe I/P int File descriptor of writing pipe for the server
+**************************************************************************/
 void serverMain(int readingPipe, int writingPipe)
 {
     char str[9];
@@ -115,6 +175,13 @@ void serverMain(int readingPipe, int writingPipe)
     close(writingPipe);
 }
 
+/***************************************************************************
+* int main ()
+* Author: Rigre R. Garciandia
+* Date: 17 September 2021
+* Description: Uses a fork and a pipe to make a client and a server process. The client sends in 
+*    data for a square, and the server checks whether it's a square and returns the data
+**************************************************************************/
 int main()
 {
     printMachineInfo();
